@@ -74,7 +74,7 @@ def coloring_img(pil_img, width, height, n, color):
 def get_upscaled_img(img):
   y, x = img.shape[:2]
   sr = cv2.dnn_superres.DnnSuperResImpl_create()
-  path = "../EDSR_x4.pb"
+  path = "EDSR_x4.pb"
   sr.readModel(path)
   sr.setModel("edsr",4)
   return sr.upsample(img)
@@ -108,20 +108,24 @@ def preprocessing_img(img):
 
   return enhanced_img
 
-def save_preprocessed_data(dir1, dir2, labels):
+def save_preprocessed_data(input_path, output_path, labels):
    # data = []
     for label in labels:
-        input_path = dir1 + '/' + label+'/'
-        output_path = dir2 + '/' + label
+        input_path = input_path + '/' + label
+        output_path = output_path + '/' + label
         #class_num = labels.index(label)
         for img in os.listdir(input_path):
           filename, file_ext = os.path.splitext(img)
           try:
             img = cv2.imread(input_path+'/'+img)
-            saved_img = preprocessing_img(img)
-            saved_img = saved_img.astype(np.uint8)
-            #if the image file name is exist it will be overwrited
+            #if the image file name is exist it will be passed
             saved_path = output_path+'/'+filename+file_ext
-            cv2.imwrite(saved_path, saved_img)
+            isExist = os.path.exists(saved_path)
+            if isExist:
+              continue
+            else:
+              saved_img = preprocessing_img(img)
+              saved_img = saved_img.astype(np.uint8)
+              cv2.imwrite(saved_path, saved_img)
           except Exception as e:
             print(e)
