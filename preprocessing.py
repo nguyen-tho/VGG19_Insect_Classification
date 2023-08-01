@@ -115,15 +115,15 @@ def save_preprocessed_data(input_path, output_path, labels):
         output_path = output_path + '/' + label
         #class_num = labels.index(label)
         for img in os.listdir(input_path):
-          filename, file_ext = os.path.splitext(img)
           try:
-            img = cv2.imread(input_path+'/'+img)
+            filename, file_ext = os.path.splitext(img)    
             #if the image file name is exist it will be passed
             saved_path = output_path+'/'+filename+file_ext
             isExist = os.path.exists(saved_path)
             if isExist:
               continue
             else:
+              img = cv2.imread(input_path+'/'+img)
               saved_img = preprocessing_img(img)
               saved_img = saved_img.astype(np.uint8)
               cv2.imwrite(saved_path, saved_img)
