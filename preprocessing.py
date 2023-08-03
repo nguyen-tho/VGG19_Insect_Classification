@@ -117,13 +117,14 @@ def save_preprocessed_data(inputs, outputs, labels):
         for img in os.listdir(input_path):
           filename, file_ext = os.path.splitext(img)
           try:
-            img = cv2.imread(input_path+'/'+img)
+            
             #if the image file name is exist it will be passed
             saved_path = output_path+'/'+filename+file_ext
             isExist = os.path.exists(saved_path)
             if isExist:
               continue
             else:
+              img = cv2.imread(input_path+'/'+img)
               saved_img = preprocessing_img(img)
               saved_img = saved_img.astype(np.uint8)
               cv2.imwrite(saved_path, saved_img)
@@ -136,6 +137,7 @@ def rotate_image(image_path, degree):
   #case 2: 180 degree
   #case 3: 270 degree clockwise or 90 degree counter clockwise
   src = cv2.imread(image_path)
+  file_name, file_ext = os.path.splitext(image_path)
   if degree == 90: 
     image = cv2.rotate(src, cv2.ROTATE_90_CLOCKWISE)
   elif degree==180:
@@ -143,6 +145,6 @@ def rotate_image(image_path, degree):
   else: 
     image = cv2.rotate(src, cv2.ROTATE_90_COUNTERCLOCKWISE)
   #save image
-  cv2.imwrite(image_path+'_'+str(degree), image)   
-  
+  saved_path = file_name+'_'+str(degree)+file_ext
+  cv2.imwrite(saved_path, image)   
   

@@ -4,14 +4,14 @@ import sys
     
 def synchronize_data(root_dir, labels):
     for label in labels:
-        path = root_dir
         counter = 1
-        path = path +str(label)+'/'
+        path = root_dir +'/'+str(label)
         print(label)
-        for filename in os.listdir(label):
+        for filename in os.listdir(path):
             file_ext = os.path.splitext(filename)[1]
-            oldFileName = os.path.join(label, filename)
-            newFileName = os.path.join(label, label+'_'+str(counter)+file_ext)
+            oldFileName = os.path.join(path, filename)
+            newFileName = os.path.join(path, label+'_'+str(counter)+file_ext)
             os.rename(oldFileName, newFileName)
             counter = counter + 1
             print('Rename file: '+ newFileName) 
+

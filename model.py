@@ -4,11 +4,12 @@ from keras.models import Sequential, Model
 from keras.layers import Dense, Conv2D , MaxPool2D , Flatten , Dropout , MaxPooling2D
 from keras.applications.vgg19 import VGG19
 
-def build_model(inputs):
-    pre_trained_model = VGG19(input_shape= inputs, include_top=False, weights="imagenet")
+def build_model(IMG_SIZE):
+    pre_trained_model = VGG19(input_shape= (IMG_SIZE, IMG_SIZE, 3), include_top=False, weights="imagenet")
 
     for layer in pre_trained_model.layers[:19]:
         layer.trainable = False
+        
 
     model = Sequential([
     pre_trained_model,
