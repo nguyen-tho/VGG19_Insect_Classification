@@ -143,6 +143,6 @@ def rotate_image(image_path, degree):
   else: 
     image = cv2.rotate(src, cv2.ROTATE_90_COUNTERCLOCKWISE)
   #save image
-  cv2.imwrite(image_path+'_'+str(degree))   
+  cv2.imwrite(image_path+'_'+str(degree), image)   
   
   
