@@ -73,7 +73,7 @@ def coloring_img(pil_img, width, height, n, color):
 
 def get_upscaled_img(img):
   y, x = img.shape[:2]
-  sr = cv2.dnn_superres.DnnSuperResImpl_create()
+  sr = cv2.dnn_superres.DnnSuperResImpl.create()
   path = "EDSR_x4.pb"
   sr.readModel(path)
   sr.setModel("edsr",4)
