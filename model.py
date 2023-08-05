@@ -1,9 +1,10 @@
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import Sequential, Model
-from keras.layers import Dense, Conv2D , MaxPool2D , Flatten , Dropout , MaxPooling2D
+from keras.layers import Dense, Conv2D , MaxPool2D , Flatten , Dropout , Concatenate
 from keras.applications.vgg19 import VGG19
 from keras.applications.resnet_v2 import ResNet101V2
+from keras.applications import ResNet50
 
 def build_VGG19(IMG_SIZE):
     pre_trained_model = VGG19(input_shape= (IMG_SIZE, IMG_SIZE, 3), include_top=False, weights="imagenet")
@@ -28,5 +29,35 @@ def build_ResNet101V2(IMG_SIZE):
     MaxPool2D((2,2) , strides = 2),
     Flatten(),
     Dense(5 , activation='softmax')])
+    
+    return model
+
+def build_RetinaNet(IMG_SIZE):
+    input_tensor = keras.Input(shape=(IMG_SIZE,IMG_SIZE,3))
+    feature_extractor = ResNet50(include_top=False, weights='imagenet', input_tensor=input_tensor)
+
+
+# Define the classification sub-network
+    classification = Conv2D(filters=9, kernel_size=(3,3), activation='relu')(feature_extractor.output)
+    #classification = Flatten()(classification)
+    #classification = Dense(units=9, activation='sigmoid')(classification) # Remove the regression subnetwork
+
+
+# Define the regression sub-network
+    regression = Conv2D(filters=36, kernel_size=(3,3), activation='relu')(feature_extractor.output)
+    #regression = Flatten()(regression) 
+    #regression = Dense(units=4)(regression)  # Remove the classification subnetwork
+    
+    # Concatenate the outputs from the classification and regression sub-networks
+    concat = Concatenate()([classification, regression])
+   
+    # retinanet for classification
+     
+    pooling = MaxPool2D((2,2) , strides = 2)(concat)
+    flatten = Flatten()(pooling)
+    output = Dense(5 , activation='softmax')(flatten) 
+    
+    # Define the final model
+    model = Model(inputs=input_tensor, outputs=output)
     
     return model
