@@ -40,3 +40,8 @@ def get_random_file(directory_path):
 
     # Return the full path to the randomly chosen file
     return os.path.join(directory_path, random_file)
+
+def get_labels(data_path):
+  #get children folders of root data directory
+  labels = os.listdir(data_path)
+  return labels
