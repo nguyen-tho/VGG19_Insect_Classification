@@ -1,19 +1,24 @@
 import os
 import cv2
-from PIL import Image
+from PIL import Image, ImageEnhance
 import numpy as np
+from time import sleep
+'''
 # Tranform OpenCV to PIL
 def OpenCV_to_PIL_img(img):
   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Convert the image color chanel for transforming to PIL image
   pil_img = Image.fromarray(img) # PIL transform
   return pil_img
-
-def crop_img(img, n):
+'''
+'''
+def crop_img(img):
   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Convert the image color channel for transforming to PIL image
   pil_img = Image.fromarray(img) # PIL transform
-  cropped_img = pil_img.crop((0, 0, n, n))
+  min_edge = min(pil_img.size)
+  cropped_img = pil_img.crop((0, 0, min_edge, min_edge))
   return cropped_img
-
+  '''
+'''
 def get_environment_color(pil_img, num_of_pixels):
     img = pil_img.copy() #image temp
 
@@ -96,7 +101,7 @@ def preprocessing_img(img):
     min = width
 
   # Crop to n x n
-  cropped_img = crop_img(img, n)
+  cropped_img = crop_img(img)
 
   # Coloring expanded part of the image
   dc = get_environment_color(cropped_img, int(min*1/100)) # Get colors at 1% pixels-of-min-length border of the image
@@ -107,8 +112,59 @@ def preprocessing_img(img):
   enhanced_img = get_upscaled_img(colored_img)
 
   return enhanced_img
+'''
+def crop_img(input_image):
+  
+  # Get the dimensions of the input image
+  height, width = input_image.shape[:2]
 
-def save_preprocessed_data(inputs, outputs, labels):
+# Determine the size of the square you want
+   # Get the dimensions of the image
+   
+    # Calculate the aspect ratio
+  aspect_ratio = width / height
+    
+    # Determine the cropping dimensions
+  if aspect_ratio > 1:
+      new_width = width
+      new_height = int(new_width / aspect_ratio)
+  else:
+      new_height = height
+      new_width = int(new_height * aspect_ratio)
+    
+    # Calculate the cropping coordinates
+  crop_x = (width - new_width) // 2
+  crop_y = (height - new_height) // 2
+    
+    # Crop the image
+  cropped_image = input_image[crop_y:crop_y + new_height, crop_x:crop_x + new_width]
+    
+  return cropped_image
+
+
+def resize_image(image, size):
+  new_size = (size, size)
+  return cv2.resize(image, new_size, interpolation= cv2.INTER_CUBIC)
+
+def enhance_image(input_image):
+  
+  sharpening_kernel = np.array([[-1, -1, -1],
+                              [-1,  9, -1],
+                              [-1, -1, -1]])
+  sharpened_image = cv2.filter2D(input_image, -1, sharpening_kernel)
+  return sharpened_image
+
+def preprocessing_img(img, size):
+  #change image into square (n x n) image
+  image = crop_img(img)
+  # resize image into standard size
+  image_resized = resize_image(image, size)
+  # sharpening image
+  enhanced_image = enhance_image(image_resized)
+  return enhanced_image
+  
+
+def save_preprocessed_data(inputs, outputs, labels, size):
    # data = []
     for label in labels:
         input_path = inputs + '/' + label
@@ -125,11 +181,15 @@ def save_preprocessed_data(inputs, outputs, labels):
               continue
             else:
               img = cv2.imread(input_path+'/'+img)
-              saved_img = preprocessing_img(img)
+              saved_img = preprocessing_img(img, size)
               saved_img = saved_img.astype(np.uint8)
               cv2.imwrite(saved_path, saved_img)
+              rotate_image(saved_path, 90)
+              rotate_image(saved_path, 180)
+              rotate_image(saved_path, 270)
           except Exception as e:
             print(e)
+          
             
 def rotate_image(image_path, degree):
   #rotate an image in 3 cases
@@ -147,4 +207,5 @@ def rotate_image(image_path, degree):
   #save image
   saved_path = file_name+'_'+str(degree)+file_ext
   cv2.imwrite(saved_path, image)   
-  
+
+

@@ -40,8 +40,21 @@ def get_random_file(directory_path):
 
     # Return the full path to the randomly chosen file
     return os.path.join(directory_path, random_file)
+<<<<<<< HEAD
+  
+def get_label(data_path):
+  #get children folders of root data directory
+  dir = os.listdir(data_path)
+  return dir
+
+def get_data_len(data):
+  return len(data)
+
+
+=======
 
 def get_labels(data_path):
   #get children folders of root data directory
   labels = os.listdir(data_path)
   return labels
+>>>>>>> a28bc1ef14045d51bfa1b4b579aa83fba56425b8
