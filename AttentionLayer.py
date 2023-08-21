@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, Activation
-
+#this class applied spatial attention
+#use a conv2d layer with sigmoid activation function
 class AttentionLayer(tf.keras.layers.Layer):
     def __init__(self):
         super(AttentionLayer, self).__init__()
