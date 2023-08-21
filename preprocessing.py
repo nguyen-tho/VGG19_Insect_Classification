@@ -123,9 +123,10 @@ def crop_img(input_image):
    
     # Calculate the aspect ratio
   aspect_ratio = width / height
+  average = (width+height)/2
     
     # Determine the cropping dimensions
-  if aspect_ratio > 1:
+  if aspect_ratio >= 1:
       new_width = width
       new_height = int(new_width / aspect_ratio)
   else:
