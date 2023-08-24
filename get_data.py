@@ -2,7 +2,10 @@ import os
 import random
 import cv2
 from torchvision import transforms
+import matplotlib.pyplot as plt
+
 torch_image_transform = transforms.ToTensor()
+
 
 def get_data(dir, labels):
     data = []
@@ -40,21 +43,19 @@ def get_random_file(directory_path):
 
     # Return the full path to the randomly chosen file
     return os.path.join(directory_path, random_file)
-<<<<<<< HEAD
-  
-def get_label(data_path):
-  #get children folders of root data directory
-  dir = os.listdir(data_path)
-  return dir
 
 def get_data_len(data):
   return len(data)
-
-
-=======
 
 def get_labels(data_path):
   #get children folders of root data directory
   labels = os.listdir(data_path)
   return labels
->>>>>>> a28bc1ef14045d51bfa1b4b579aa83fba56425b8
+
+def count_files_in_folder(folder_path):
+    file_count = 0
+    for item in os.listdir(folder_path):
+        if os.path.isfile(os.path.join(folder_path, item)):
+            file_count += 1
+    return file_count
+

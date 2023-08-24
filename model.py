@@ -6,7 +6,6 @@ from keras.layers import Dense, Conv2D , MaxPool2D , Flatten , Dropout , Concate
 from keras.applications.vgg19 import VGG19
 from keras.applications.resnet_v2 import ResNet101V2
 from keras.applications import ResNet50
-import AttentionLayer
 
 
 def build_VGG19(IMG_SIZE):
@@ -37,7 +36,7 @@ def build_ResNet101V2(IMG_SIZE):
 
 def build_RetinaNet(IMG_SIZE):
     input_tensor = keras.Input(shape=(IMG_SIZE,IMG_SIZE,3))
-    feature_extractor = ResNet50(include_top=False, weights='imagenet', input_tensor=input_tensor)
+    feature_extractor = ResNet50(include_top=False, weights='imagenet', input_shaoe=input_tensor)
 
 
 # Define the classification sub-network
@@ -69,12 +68,12 @@ def build_ResNet101V2_Attention(IMG_SIZE):
     input_tensor = keras.Input(shape=(IMG_SIZE, IMG_SIZE, 3))
     feature_extractor = ResNet101V2(include_top=False, weights='imagenet', input_tensor=input_tensor)
   # Define a spatial attention layer
-    #attention = Conv2D(1, (1, 1), activation='sigmoid')(feature_extractor.output)
+    attention = Conv2D(1, (1, 1), activation='sigmoid')(feature_extractor.output)
 
 # Multiply the original features with attention weights
-    #attended_features = Multiply()([feature_extractor.output, attention])
+    attended_features = Multiply()([feature_extractor.output, attention])
     
-    attended_features = AttentionLayer()(feature_extractor.output)
+    #attended_features = AttentionLayer.AttentionLayer()(feature_extractor.output)
     pooling = GlobalAveragePooling2D()(attended_features)
     dense = Dense(5, activation='softmax')(pooling)
   

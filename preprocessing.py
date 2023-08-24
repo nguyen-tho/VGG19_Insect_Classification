@@ -2,14 +2,15 @@ import os
 import cv2
 from PIL import Image, ImageEnhance
 import numpy as np
-from time import sleep
-'''
+import io
+import random
+
 # Tranform OpenCV to PIL
 def OpenCV_to_PIL_img(img):
   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Convert the image color chanel for transforming to PIL image
   pil_img = Image.fromarray(img) # PIL transform
   return pil_img
-'''
+
 '''
 def crop_img(img):
   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Convert the image color channel for transforming to PIL image
@@ -75,15 +76,15 @@ def coloring_img(pil_img, width, height, n, color):
       for h in range(height, n):
         pil_img.putpixel((w, h), color)
   return pil_img
-
+'''
 def get_upscaled_img(img):
   y, x = img.shape[:2]
   sr = cv2.dnn_superres.DnnSuperResImpl.create()
   path = "EDSR_x4.pb"
   sr.readModel(path)
-  sr.setModel("edsr",4)
+  sr.setModel("edsr",1)
   return sr.upsample(img)
-
+'''
 def resize_img(img, width, height, n):
   scaleX = n/width
   scaleY = n/height
@@ -112,6 +113,7 @@ def preprocessing_img(img):
   enhanced_img = get_upscaled_img(colored_img)
 
   return enhanced_img
+'''
 '''
 def crop_img(input_image):
   
@@ -142,30 +144,118 @@ def crop_img(input_image):
     
   return cropped_image
 
-
+'''
+def resize_to_average(original_image):
+    
+    # Get the dimensions of the original image
+    original_height, original_width = original_image.shape[:2]
+    
+    # Calculate the average size
+    average_size = (original_width + original_height) // 2
+    
+    # Create a new square image with the average size
+    square_image = cv2.resize(original_image, (average_size, average_size))
+    
+    # Save the resulting square image
+    return square_image
+  
 def resize_image(image, size):
   new_size = (size, size)
   return cv2.resize(image, new_size, interpolation= cv2.INTER_CUBIC)
 
 def enhance_image(input_image):
-  
+  upscaled_img = get_upscaled_img(input_image)
   sharpening_kernel = np.array([[-1, -1, -1],
                               [-1,  9, -1],
                               [-1, -1, -1]])
-  sharpened_image = cv2.filter2D(input_image, -1, sharpening_kernel)
+  sharpened_image = cv2.filter2D(upscaled_img, -1, sharpening_kernel)
   return sharpened_image
 
 def preprocessing_img(img, size):
   #change image into square (n x n) image
-  image = crop_img(img)
-  # resize image into standard size
-  image_resized = resize_image(image, size)
+  image = resize_to_average(img) 
   # sharpening image
-  enhanced_image = enhance_image(image_resized)
-  return enhanced_image
-  
+  enhanced_image = enhance_image(image)
+  # resize image into standard size
+  image_resized = resize_image(enhanced_image, size)
+  return image_resized
+'''
+def preprocessing_image(image, IMG_SIZE): #return CV2 image
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    #Change to PIL format
+    pil_img = Image.fromarray(image)
 
-def save_preprocessed_data(inputs, outputs, labels, size):
+    #Get the shortest edge length
+    min_edge_length = min(pil_img.size[0], pil_img.size[1])
+    max_edge_length = max(pil_img.size[0], pil_img.size[1])
+
+    if min_edge_length == pil_img.size[0]:
+        shortest_edge = "width"
+    else:
+        shortest_edge = "height"
+
+    #Crop the image to n x n pixels with n = max_edge_length
+    cropped_img = pil_img.crop((0, 0, max_edge_length, max_edge_length))
+
+    #Transform the image by translating the image to center
+    translate_length = int((max_edge_length - min_edge_length)/2)
+
+    if shortest_edge == "width":
+        translated_img = cropped_img.transform(cropped_img.size, Image.AFFINE, (1, 0, -translate_length, 0, 1, 0))
+    else:
+        translated_img = cropped_img.transform(cropped_img.size, Image.AFFINE, (1, 0, 0, 0, 1, -translate_length))
+
+    #Grayscale image
+    width, height = translated_img.size
+    gray_img = Image.new('1', (width, height)) #blank grayscale image with same width and height
+
+    #Reducing RBG values for grayscale image
+    divide_number = random.randint(75000, 100000)
+
+    for x in range(width):
+        for y in range(height):
+            r, g, b = translated_img.getpixel((x, y))
+            multiply_g = 587.0/divide_number
+            multiply_r = 299.0/divide_number
+            multiply_b = 114.0/divide_number
+
+            value = r * multiply_r + g * multiply_g + b * multiply_b
+            value = int(value)
+            gray_img.putpixel((x, y), value)
+
+    RBG_img = Image.new("RGB", (width, height))
+    RBG_img.paste(gray_img)
+    gray_3chanels_img = RBG_img
+
+    #Resize the image to 224 x 224 pixels fit to the model
+    gray_3chanels_img.thumbnail((IMG_SIZE, IMG_SIZE), Image.Resampling.LANCZOS)
+    preprocessed_image = np.asarray(gray_3chanels_img)
+    return preprocessed_image
+'''  
+def preprocessing_image(image):
+    # Convert to grayscale
+    gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    # Get the shortest and longest edge lengths
+    min_edge_length = min(image.shape[0], image.shape[1])
+    max_edge_length = max(image.shape[0], image.shape[1])
+
+    # Crop to a square
+    cropped_img = gray_img[:max_edge_length, :max_edge_length]
+    
+    # Translate the image to center
+    translate_length = abs(max_edge_length - min_edge_length) // 2
+    if min_edge_length == image.shape[0]:
+        translated_img = np.pad(cropped_img, ((translate_length, translate_length), (0, 0)), mode='constant')
+    else:
+        translated_img = np.pad(cropped_img, ((0, 0), (translate_length, translate_length)), mode='constant')
+
+    # Resize the image to 224 x 224 pixels
+    resized_img = cv2.resize(translated_img, (224, 224), interpolation=cv2.INTER_LANCZOS4)
+
+    return resized_img
+
+def save_preprocessed_data(inputs, outputs, labels):
    # data = []
     for label in labels:
         input_path = inputs + '/' + label
@@ -182,7 +272,7 @@ def save_preprocessed_data(inputs, outputs, labels, size):
               continue
             else:
               img = cv2.imread(input_path+'/'+img)
-              saved_img = preprocessing_img(img, size)
+              saved_img = preprocessing_image(img)
               saved_img = saved_img.astype(np.uint8)
               cv2.imwrite(saved_path, saved_img)
               rotate_image(saved_path, 90)
