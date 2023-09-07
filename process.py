@@ -8,7 +8,7 @@ from time import sleep
     
 
 def preprocess_progress(data_dir, saved_data_dir, labels):
-    data_len = get_data.get_data_len(get_data.get_data(data_dir, labels))
+    data_len = get_data.get_data(data_dir, labels)[1]
     for i in tqdm(range(0, data_len), desc ="Preprocessed Image: "):
         pre.save_preprocessed_data(data_dir, saved_data_dir, labels)
         sleep(.1)    
@@ -17,7 +17,7 @@ def preprocess_progress(data_dir, saved_data_dir, labels):
     
 
 def synchronize_progress(data_dir, labels):
-    data_len = get_data.get_data_len(get_data.get_data(data_dir, labels))
+    data_len = get_data.get_data(data_dir, labels)[1]
     for i in tqdm(range(0, data_len), desc ="Synchronized Image: "):
         sync.synchronize_data(data_dir, labels)
         sleep(.1)

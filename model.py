@@ -75,7 +75,8 @@ def build_ResNet101V2_Attention(IMG_SIZE):
     
     #attended_features = AttentionLayer.AttentionLayer()(feature_extractor.output)
     pooling = MaxPool2D((2,2) , strides = 2)(attended_features)
-    dense = Dense(5, activation='softmax')(pooling)
+    flat = Flatten()(pooling)
+    dense = Dense(5, activation='softmax')(flat)
   
     model = Model (inputs= input_tensor, outputs=dense)
     return model

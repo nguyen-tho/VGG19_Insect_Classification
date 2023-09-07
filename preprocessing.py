@@ -275,9 +275,9 @@ def save_preprocessed_data(inputs, outputs, labels):
               saved_img = preprocessing_image(img)
               saved_img = saved_img.astype(np.uint8)
               cv2.imwrite(saved_path, saved_img)
-              rotate_image(saved_path, 90)
-              rotate_image(saved_path, 180)
-              rotate_image(saved_path, 270)
+              #rotate and save rotated images
+              for angle in range(30, 360, 30):
+                rotate_image(saved_path, angle)      
           except Exception as e:
             print(e)
           
@@ -289,14 +289,18 @@ def rotate_image(image_path, degree):
   #case 3: 270 degree clockwise or 90 degree counter clockwise
   src = cv2.imread(image_path)
   file_name, file_ext = os.path.splitext(image_path)
-  if degree == 90: 
-    image = cv2.rotate(src, cv2.ROTATE_90_CLOCKWISE)
-  elif degree==180:
-    image = cv2.rotate(src, cv2.ROTATE_180)
-  else: 
-    image = cv2.rotate(src, cv2.ROTATE_90_COUNTERCLOCKWISE)
+  height, width = src.shape[:2]
+
+# Define the rotation angle in degrees (e.g., 10 degrees)
+  angle = 30
+
+# Calculate the rotation matrix
+  rotation_matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+
+# Perform the rotation
+  rotated_img = cv2.warpAffine(src, rotation_matrix, (width, height))
   #save image
   saved_path = file_name+'_'+str(degree)+file_ext
-  cv2.imwrite(saved_path, image)   
+  cv2.imwrite(saved_path, rotated_img)   
 
 
