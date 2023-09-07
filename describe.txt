@@ -1,0 +1,12 @@
+Dataset:
+  original dataset 600 images 5 classes
+  generated dataset: the the number of images as 12 times as original dataset (7200 images, 5 classees)
+====================================================================================================================================================================
+Training log and model saved file:
+model.h5 and training.log are for VGG19 model (version 1)
+model1.h5 and training1.log are for ResNet101V2 (version 2)
+model2.h5 and training2.log are for NesNet101V2 with convert original images into nxn size images (version 3)
+model3.h5 and training3.log are for ResNet101V2 with attention layer, convert original images into nxn size images, generating data into as 4 times as the origin and converting original images into greyscale images (version 4)
+model4.h5 and training4.h5 are for ResNet101V2 with attention, converting original images into greyscale images, generating data into as 12 times as the origin  and random samples (version 5) (in progress)
+====================================================================================================================================================================
+  
